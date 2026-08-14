@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ナッシー号 乗り継ぎナビ | 白井市コミュニティバス</title>
+<style>
+:root{
+  --bg:#0b0f14;
+  --panel:#121821;
+  --panel2:#0e1319;
+  --line:#1f2b38;
+  --text:#e7edf3;
+  --sub:#8fa3b8;
+  --kita:#e74c3c;
+  --nishi:#f5a623;
+  --higashi:#2ecc71;
+  --minami:#3498db;
+  --accent:#00d4c4;
+  --accent2:#00d4c4;
+  --warn:#f5a623;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(1200px 600px at 100% -10%, #0f1a22 0%, transparent 60%),
+    radial-gradient(1000px 500px at -10% 110%, #0f1c1a 0%, transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Hiragino Sans","Yu Gothic",-apple-system,BlinkMacSystemFont,sans-serif;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+.wrap{max-width:640px;margin:0 auto;padding:18px 16px 0;}
+
+header.top{
+  padding:22px 4px 14px;
+  border-bottom:1px solid var(--line);
+  position:relative;
+}
+.route-strip{
+  display:flex;height:4px;border-radius:3px;overflow:hidden;margin-bottom:14px;
+}
+.route-strip span{flex:1;}
+.route-strip .k{background:var(--kita);}
+.route-strip .n{background:var(--nishi);}
+.route-strip .h{background:var(--higashi);}
+.route-strip .m{background:var(--minami);}
+
+h1{
+  font-size:1.32rem;
+  margin:0 0 4px;
+  letter-spacing:.02em;
+  font-weight:700;
+}
+h1 small{
+  display:block;font-size:.72rem;color:var(--sub);font-weight:500;letter-spacing:.08em;margin-top:2px;
+}
+.badge-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.badge{font-size:.68rem;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--sub);}
+
+nav.tabs{
+  display:flex;gap:8px;margin:18px 0 16px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:4px;
+}
+nav.tabs button{
+  flex:1;padding:11px 6px;border:none;border-radius:11px;
+  background:transparent;color:var(--sub);font-size:.86rem;font-weight:700;
+  cursor:pointer;transition:.15s;letter-spacing:.02em;
+}
+nav.tabs button.active{background:var(--accent);color:#04211e;}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:18px 16px;
+  margin-bottom:16px;
+}
+.panel h2{
+  font-size:.95rem;margin:0 0 14px;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.panel h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+
+label.field{display:block;margin-bottom:14px;}
+label.field span.lbl{
+  display:block;font-size:.72rem;color:var(--sub);margin-bottom:6px;letter-spacing:.03em;
+}
+input[type=text],input[type=time],input[type=number],select{
+  width:100%;background:var(--panel2);border:1px solid var(--line);
+  color:var(--text);padding:11px 12px;border-radius:10px;font-size:.95rem;
+  outline:none;
+}
+input[type=text]:focus,input[type=time]:focus,select:focus,input[type=number]:focus{
+  border-color:var(--accent);
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.swap-row{display:flex;align-items:center;gap:8px;}
+.swap-btn{
+  background:var(--panel2);border:1px solid var(--line);color:var(--accent);
+  width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer;flex:none;
+  display:flex;align-items:center;justify-content:center;margin-top:18px;
+}
+.time-quick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.chip{
+  font-size:.72rem;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
+  color:var(--sub);background:var(--panel2);cursor:pointer;
+}
+.chip.active{border-color:var(--accent);color:var(--accent);}
+
+button.primary{
+  width:100%;padding:13px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),#00a89c);
+  color:#04211e;font-size:.95rem;font-weight:800;letter-spacing:.02em;
+  cursor:pointer;margin-top:4px;
+}
+button.primary:active{transform:scale(.99);}
+
+.result-card{
+  background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+  padding:14px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+.result-card.best::before{
+  content:"最短";position:absolute;top:0;right:0;
+  background:var(--accent);color:#04211e;font-size:.62rem;font-weight:800;
+  padding:3px 10px;border-radius:0 0 0 10px;
+}
+.result-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.result-total{font-size:1.5rem;font-weight:800;color:var(--accent);}
+.result-total small{font-size:.75rem;color:var(--sub);font-weight:500;}
+.leg{
+  display:flex;gap:10px;align-items:flex-start;padding:8px 0;
+  border-top:1px dashed var(--line);
+}
+.leg:first-of-type{border-top:none;}
+.leg .tag{
+  flex:none;font-size:.65rem;font-weight:800;padding:3px 7px;border-radius:6px;
+  color:#04211e;margin-top:1px;
+}
+.leg .tag.walk{background:var(--sub);color:#04211e;}
+.leg-body{flex:1;font-size:.84rem;line-height:1.5;}
+.leg-body .t{font-weight:700;font-size:.92rem;}
+.leg-body .s{color:var(--sub);}
+.wait-note{
+  font-size:.75rem;color:var(--warn);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);
+}
+.empty{
+  text-align:center;color:var(--sub);font-size:.85rem;padding:30px 10px;
+}
+.empty .em{font-size:1.8rem;display:block;margin-bottom:8px;}
+
+table.tt{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.tt th,table.tt td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);}
+table.tt th{color:var(--sub);font-weight:600;font-size:.72rem;}
+table.tt td.stopname{text-align:left;color:var(--text);font-size:.78rem;}
+table.tt td.next{background:rgba(0,212,196,.12);color:var(--accent);font-weight:800;border-radius:6px;}
+table.tt tr.hub td.stopname{color:var(--accent);font-weight:700;}
+.scrollbox{max-height:56vh;overflow:auto;border-radius:10px;}
+.scrollbox::-webkit-scrollbar{width:6px;}
+.scrollbox::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+
+.foot-note{font-size:.72rem;color:var(--sub);line-height:1.7;padding:0 4px;}
+.foot-note b{color:var(--warn);}
+
+datalist{display:none;}
+.sug-list{
+  position:relative;
+}
+.sug-drop{
+  position:absolute;left:0;right:0;top:calc(100% + 4px);
+  background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  max-height:200px;overflow:auto;z-index:20;display:none;
+}
+.sug-drop.show{display:block;}
+.sug-item{padding:9px 12px;font-size:.85rem;cursor:pointer;border-bottom:1px solid var(--line);}
+.sug-item:last-child{border-bottom:none;}
+.sug-item:hover,.sug-item.hi{background:rgba(0,212,196,.1);}
+.sug-item .no{color:var(--sub);font-size:.72rem;margin-right:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="route-strip"><span class="k"></span><span class="n"></span><span class="h"></span><span class="m"></span></div>
+  <h1>ナッシー号 乗り継ぎナビ<small>白井市コミュニティバス 非公式ルート検索</small></h1>
+  <div class="badge-row">
+    <span class="badge" id="dataDateBadge">令和3年8月1日改正ダイヤ</span>
+    <span class="badge">全4ルート・徒歩込み</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button id="tabBtnSearch" class="active">乗り継ぎ検索</button>
+  <button id="tabBtnTimetable">時刻表</button>
+</nav>
+
+<!-- ===== 乗り継ぎ検索 ===== -->
+<section id="tabSearch">
+  <div class="panel">
+    <h2><span class="dot"></span>どこから、どこへ</h2>
+
+    <div class="swap-row" style="align-items:flex-end;">
+      <label class="field sug-list" style="flex:1;margin-bottom:0;">
+        <span class="lbl">出発の停留所</span>
+        <input type="text" id="fromInput" placeholder="例）冨士センター" autocomplete="off">
+        <div class="sug-drop" id="fromSug"></div>
+      </label>
+      <button class="swap-btn" id="swapBtn" title="入れ替え">⇅</button>
+      <label class="field sug-list" style="flex:1;margin-bottom:0;">
+        <span class="lbl">到着の停留所</span>
+        <input type="text" id="toInput" placeholder="例）西白井駅" autocomplete="off">
+        <div class="sug-drop" id="toSug"></div>
+      </label>
+    </div>
+
+    <div style="height:14px;"></div>
+
+    <label class="field">
+      <span class="lbl">出発したい時刻</span>
+      <input type="time" id="timeInput">
+      <div class="time-quick">
+        <span class="chip active" data-q="now">今すぐ</span>
+        <span class="chip" data-q="+15">15分後</span>
+        <span class="chip" data-q="+30">30分後</span>
+        <span class="chip" data-q="+60">1時間後</span>
+      </div>
+    </label>
+
+    <div class="row2">
+      <label class="field" style="margin-bottom:0;">
+        <span class="lbl">停留所までの徒歩(分)</span>
+        <input type="number" id="walkFrom" value="0" min="0" max="60">
+      </label>
+      <label class="field" style="margin-bottom:0;">
+        <span class="lbl">停留所から目的地(分)</span>
+        <input type="number" id="walkTo" value="0" min="0" max="60">
+      </label>
+    </div>
+
+    <button class="primary" id="searchBtn">この条件で検索</button>
+  </div>
+
+  <div id="resultsBox"></div>
+
+  <p class="foot-note">
+    乗り継ぎは公式ルールにより <b>白井市役所・白井駅・西白井駅</b> のみで可能です（乗り継ぎ券が必要）。
+    このアプリはPDF時刻表から自動抽出したデータを使用しています。特に北ルートの分岐区間（今井経由/工業団地経由）は現物の時刻表と照合してください。
+  </p>
+</section>
+
+<!-- ===== 時刻表 ===== -->
+<section id="tabTimetable" style="display:none;">
+  <div class="panel">
+    <h2><span class="dot"></span>停留所を選ぶ</h2>
+    <label class="field sug-list" style="margin-bottom:0;">
+      <span class="lbl">停留所名</span>
+      <input type="text" id="ttStopInput" placeholder="例）市役所" autocomplete="off">
+      <div class="sug-drop" id="ttSug"></div>
+    </label>
+  </div>
+
+  <div class="panel" id="ttRouteDirPanel" style="display:none;">
+    <h2><span class="dot"></span>ルート・方向</h2>
+    <div id="ttRouteChips" class="time-quick"></div>
+  </div>
+
+  <div class="panel" id="ttTablePanel" style="display:none;">
+    <h2><span class="dot"></span><span id="ttTitle">時刻表</span></h2>
+    <div class="scrollbox"><table class="tt" id="ttTable"></table></div>
+  </div>
+</section>
+
+</div>
+
+<script src="bus_data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
